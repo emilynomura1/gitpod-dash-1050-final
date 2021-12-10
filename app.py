@@ -12,7 +12,7 @@ app = dash.Dash(__name__)
 
 app.layout = html.Div(children=[
     html.H2(children='NFL Weather Data'),
-    #html.Img(src='/assets/image.png')
+    html.Img(src='/assets/nfl logo.jpg',width="210", height="118"),
     html.Label("Select your team: "),
     dcc.Dropdown(
         id = 'my_dropdown1',
@@ -52,7 +52,12 @@ app.layout = html.Div(children=[
             value='Select a team'
         ),
         html.Label(id='my_label1'),
-        
+ html.Button(
+            id='submit-button',
+            n_clicks=0,
+            children='Submit',
+            style={'fontSize':16}
+        ),       
     
 ])
 
