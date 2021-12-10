@@ -11,8 +11,8 @@ from dash.dependencies import Input, Output, State
 app = dash.Dash(__name__)
 
 app.layout = html.Div(children=[
-    html.H2(children='Greetings!'),
-
+    html.H2(children='NFL Weather Data'),
+    #html.Img(src='/assets/image.png')
     html.Label("Select your team: "),
     dcc.Dropdown(
         id = 'my_dropdown1',
