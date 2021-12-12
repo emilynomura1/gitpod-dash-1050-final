@@ -10,9 +10,15 @@ from dash.dependencies import Input, Output, State
 
 app = dash.Dash(__name__)
 
-app.layout = html.Div(children=[
-    html.H2(children='NFL Weather Data'),
-    html.Img(src='/assets/nfl logo.jpg',width="210", height="118"),
+app.layout = html.Div([
+    html.Div(
+        className="app-header",
+        children=[
+            html.Div('NFL Weather Data', className="app-header--title")
+        ]
+    ),
+    html.Div(children=[
+    html.Img(src='/assets/nfl logo.jpg', width="210", height="118", className="center"),
     html.Label("Select your team: "),
     dcc.Dropdown(
         id = 'my_dropdown1',
@@ -59,6 +65,7 @@ app.layout = html.Div(children=[
             style={'fontSize':16}
         ),       
     
+    ], className="center")
 ])
 
 
