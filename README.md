@@ -1,4 +1,4 @@
-# Data Science Web Application Project - NFL Weather Data
+# DS Web Application Project: NFL Weather Data
 
 ## Description
 This project is for the [Brown University Data Science](https://www.brown.edu/initiatives/data-science/masters-degree) Master's course, DATA 1050 - Data Engineering. The purpose of the project is to develop a database-backed website that provides the results of a particular data science project.
@@ -17,7 +17,7 @@ If the game has not been played yet, the percentage of games the team has won in
 ## How to Launch the Web App
 The web application can be launched and rendered through Gitpod using the public GitHub repository link provided. Detailed steps are as follows:
 1. Copy the project GitHub link: https://github.com/emilynomura1/gitpod-dash-1050-final
-2. In your web browser's address bar, insert the text **gitpod.io/#** before pasting the project GitHub link, navigate to that webpage
+2. In your web browser's address bar, insert **gitpod.io/#** before pasting the project GitHub link, navigate to that webpage
 3. Sign in with GitHub if necessary
 4. Wait for packages to download. Relevant packages for the project can be found in [run.sh](https://github.com/emilynomura1/gitpod-dash-1050-final/blob/main/run.sh).
 5. Open the app.py file and click “Run Python File” in the upper right corner or execute **python3 app.py** in the Gitpod terminal.
