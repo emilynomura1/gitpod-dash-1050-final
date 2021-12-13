@@ -18,3 +18,4 @@ If the game has not been played yet, the percentage of games the team has won in
 - Python version [3.8.12](https://docs.python.org/release/3.8.12/)
 - [Plotly Dash](https://dash.plotly.com/)
 - [Supabase](https://supabase.com/docs)
+- [Gitpod](https://www.gitpod.io/)
