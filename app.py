@@ -142,7 +142,7 @@ def pickATeam(n_clicks, input_my_dropdown1):
     ##add append code here
     if (finished[(finished.Home == input_my_dropdown1)|(finished.Away == input_my_dropdown1)].shape[0] != 0):
         target = finished[(finished.Away == input_my_dropdown1) | (finished.Home == input_my_dropdown1)]
-        stringret = "Your team has already played. The {} were the home team and the {} were the away team. {}".format())
+        stringret = "Your team has already played. The {} were the home team and the {} were the away team.".format(str(target['Home']).split()[1], str(target['Away']).split()[1])
         #dispret = {'display': 'none'}
         test = pd.DataFrame()
         table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
