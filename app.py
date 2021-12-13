@@ -10,6 +10,7 @@ from supabase import create_client, Client
 import requests
 from bs4 import BeautifulSoup
 import datetime
+import plotly.express as px
 
 
 # connection to db
@@ -151,7 +152,11 @@ app.layout = html.Div([
             columns=[{"name": str(i), "id": str(i)} for i in test.columns],
             data=test.to_dict('records')
         )
-    ])
+    ]),
+
+    html.Div([
+
+		], id="bar-chart")
 ])
 
 
@@ -159,20 +164,23 @@ app.layout = html.Div([
 @app.callback(
     [Output('result', 'children'),
     Output(component_id='table', component_property='columns'),
-    Output(component_id='table', component_property='data')],
+    Output(component_id='table', component_property='data'),
+    Output(component_id='bar-chart', component_property='children')],
     Input(component_id='submit-button', component_property='n_clicks'),
     State(component_id='my_dropdown1', component_property='value'),
+    State(component_id='bar-chart', component_property='children')
  
 )
 
-def pickATeam(n_clicks, input_my_dropdown1):
+def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
     if (n_clicks == 0):
         test = pd.DataFrame()
         stringret = "Please select a team."
         #dispret = {'display': 'none'}
         table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
         table_records = test.to_dict('records')
-        return (stringret, table_cols, table_records)
+        chart = None
+        return (stringret, table_cols, table_records, chart)
     
     if (df[(df.Home == input_my_dropdown1)|(df.Away == input_my_dropdown1)].shape[0] == 0):
         stringret = "Your team has a bye this week."
@@ -180,7 +188,8 @@ def pickATeam(n_clicks, input_my_dropdown1):
         test = pd.DataFrame()
         table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
         table_records = test.to_dict('records')
-        return (stringret, table_cols, table_records)
+        chart = None
+        return (stringret, table_cols, table_records, chart)
 
     if (finished[(finished.Home == input_my_dropdown1)|(finished.Away == input_my_dropdown1)].shape[0] != 0):
         target = finished[(finished.Away == input_my_dropdown1) | (finished.Home == input_my_dropdown1)]
@@ -192,7 +201,8 @@ def pickATeam(n_clicks, input_my_dropdown1):
         test = pd.DataFrame()
         table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
         table_records = test.to_dict('records')
-        return (stringret, table_cols, table_records)
+        chart = None
+        return (stringret, table_cols, table_records, chart)
     
     target = future[(future.Away == input_my_dropdown1) | (future.Home == input_my_dropdown1)]
     team = historical[(historical.home == input_my_dropdown1)|(historical.away == input_my_dropdown1)]
@@ -204,6 +214,30 @@ def pickATeam(n_clicks, input_my_dropdown1):
         comparable = comparable.drop(columns = ["unique_event_id","avg_temp","avg_wind", "precipitation"]).tail(10)
         table_cols = [{"name": str(i), "id": str(i)} for i in comparable.columns]
         table_records = comparable.to_dict('records')
+
+        all_comp = historical[historical.stadium=='dome']
+        winners = all_comp.groupby(by='winner').count()['date']
+        aways = all_comp.groupby(by='away').count()['date']
+        homes = all_comp.groupby(by='home').count()['date']
+
+        temp = pd.merge(winners, aways, how='outer', left_index=True, right_index=True)
+        final = pd.merge(temp, homes, how='outer', left_index=True, right_index=True)
+        final = final.rename(columns = {'date_x': 'wins', 'date_y': 'away_games', 'date': 'home_games'})
+        final = final.fillna(0)
+        final['games'] = final['away_games'] + final['home_games']
+        final['win_pct'] = final['wins'] / final['games']
+        final = final.sort_values('win_pct', ascending=False)
+        if 'tie' in final.index:
+            final = final.drop('tie')
+
+        if bar_chart:
+            bar_chart[0] = px.bar(final, y="win_pct", title="Winning Percentage of All Teams in Domes")
+        else:
+            bar_chart = [
+				dcc.Graph(
+					figure=px.bar(final, y="win_pct", title="Winning Percentage of All Teams in Domes")
+                )
+            ]
         
     else:
         target.Temp = target.Temp.astype(float)
@@ -220,6 +254,29 @@ def pickATeam(n_clicks, input_my_dropdown1):
         comparable = comparable.drop(columns = ["unique_event_id"]).tail(10)
         table_cols = [{"name": str(i), "id": str(i)} for i in comparable.columns]
         table_records = comparable.to_dict('records')
-    return (stringret, table_cols, table_records)
+
+        winners = comparable.groupby(by='winner').count()['date']
+        aways = comparable.groupby(by='away').count()['date']
+        homes = comparable.groupby(by='home').count()['date']
+
+        temp = pd.merge(winners, aways, how='outer', left_index=True, right_index=True)
+        final = pd.merge(temp, homes, how='outer', left_index=True, right_index=True)
+        final = final.rename(columns = {'date_x': 'wins', 'date_y': 'away_games', 'date': 'home_games'})
+        final = final.fillna(0)
+        final['games'] = final['away_games'] + final['home_games']
+        final['win_pct'] = final['wins'] / final['games']
+        final = final.sort_values('win_pct', ascending=False)
+        final = final.drop('tie')
+
+        if bar_chart:
+            bar_chart[0] = px.bar(final, y="win_pct", title="Winning Percentage of All Teams in Comparable Weather Conditions")
+        else:
+            bar_chart = [
+				dcc.Graph(
+					figure=px.bar(final, y="win_pct", title="Winning Percentage of All Teams in Comparable Weather Conditions")
+                )
+            ]
+    
+    return (stringret, table_cols, table_records, bar_chart)
 
 app.run_server(debug=True, host="0.0.0.0")
