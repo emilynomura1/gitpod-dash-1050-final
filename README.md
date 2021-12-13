@@ -11,6 +11,7 @@ Plotly Dash was used to create the front-end web application. A dropdown box req
 - If the game has already been played
 - If the game is being played in a dome
 - If the game has not been played yet
+
 If the game has not been played yet, the percentage of games the team has won in similar weather conditions is displayed along with a filtered table of the most recent games in the historical database played by the same team in similar weather conditions. This last aspect of the web application summarizes the historical data in a new and interesting way according to user input and information extracted from current weather data. 
 
 ## Technologies Used
