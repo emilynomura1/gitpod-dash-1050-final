@@ -82,16 +82,20 @@ assert data.get("status_code") in (200, 201)
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
+    
     html.Div(
         className="app-header",
         children=[
             html.Div('NFL Weather Data', className="app-header--title")
         ]
     ),
-    html.Div(children=[
-    html.Img(src='/assets/nfl logo.jpg', width="210", height="118", className="center"),
+    html.Img(src='/assets/nfl logo.jpg', width="150", height="250", className="center",style={"padding": "10px"}),
+    
+    html.Div(id='intro',style={"padding": "10px",'fontSize':14}, children = "Welcome to our NFL Weather Data app. This app looks at how each team does in the forecasted weather conditions for their next game, based on data from the 2010-2017 seasons. "),
+    html.Div(children=[    
     html.Label("Select your team: "),
     dcc.Dropdown(
+        
         id = 'my_dropdown1',
         options= [
     {"label": "Arizona Cardinals", "value": 'Cardinals'},
@@ -129,16 +133,17 @@ app.layout = html.Div([
             ],
             value='Select a team'
         ),
-        html.Label(id='my_label1'),
+        html.Label(id='my_label1',style={"margin-bottom": "20px"}),
     html.Button(
             id='submit-button',
             n_clicks=0,
             children='Submit',
-            style={'fontSize':16}
+            style={'fontSize':16},
+            
         ),       
     
     ], className="center"),
-    html.Div(id='result'),
+    html.Div(id='result',style={"padding": "10px"}),
     
     html.Div([
         dash_table.DataTable(
@@ -163,7 +168,7 @@ app.layout = html.Div([
 def pickATeam(n_clicks, input_my_dropdown1):
     if (n_clicks == 0):
         test = pd.DataFrame()
-        stringret = "Hello, please select a team."
+        stringret = "Please select a team."
         #dispret = {'display': 'none'}
         table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
         table_records = test.to_dict('records')
@@ -195,8 +200,8 @@ def pickATeam(n_clicks, input_my_dropdown1):
         comparable = team[team.stadium=='dome']
         x = round(comparable[comparable.winner == input_my_dropdown1].shape[0]/comparable.shape[0],2)
         percentage = "{:.0%}".format(x)
-        stringret = "Your team is playing in a dome. In the past they have won {} percent of games they have played in a dome".format(percentage)
-        #dispret = {'display': 'block'}
+        stringret = "Your team is playing in a dome. In the 2010-2017 seasons, they won {} percent of games they have played in a dome. Below are the results of up to 10 of the most recent games (through the 2017 season) the team has played in a dome:".format(percentage)
+        comparable = comparable.drop(columns = ["unique_event_id","avg_temp","avg_wind", "precipitation"]).tail(10)
         table_cols = [{"name": str(i), "id": str(i)} for i in comparable.columns]
         table_records = comparable.to_dict('records')
         
@@ -208,11 +213,11 @@ def pickATeam(n_clicks, input_my_dropdown1):
         upwind = (target.WindSpeed.values[0]+5)
         lowwind = (target.WindSpeed.values[0]-5)
         comparable = team[(team.avg_temp > lowtemp)&(team.avg_temp < uptemp)&(team.precipitation==target.Precipitation.values[0])&(team.avg_wind < upwind )&(team.avg_wind > lowwind )]
+        
         x = round(comparable[comparable.winner == input_my_dropdown1].shape[0]/comparable.shape[0],2)
         percentage = "{:.0%}".format(x)
-    
-        stringret = "Your team has won {} percent of games in comparable weather conditions.".format(percentage)
-        #dispret = {'display': 'block'}
+        stringret = "Your team has won {} percent of games in comparable weather conditions in the 2010-2017 seasons. Below are results of up to 10 of the most recent games (through the 2017 season) in comparable conditions: ".format(percentage)
+        comparable = comparable.drop(columns = ["unique_event_id"]).tail(10)
         table_cols = [{"name": str(i), "id": str(i)} for i in comparable.columns]
         table_records = comparable.to_dict('records')
     return (stringret, table_cols, table_records)
