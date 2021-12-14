@@ -230,14 +230,13 @@ def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
         if 'tie' in final.index:
             final = final.drop('tie')
 
-        if bar_chart:
-            bar_chart[0] = px.bar(final, y="win_pct", title="Winning Percentage of All Teams in Domes")
-        else:
-            bar_chart = [
-				dcc.Graph(
-					figure=px.bar(final, y="win_pct", title="Winning Percentage of All Teams in Domes")
-                )
-            ]
+        chart = [
+            dcc.Graph(
+                figure=px.bar(final, y="win_pct", 
+                labels={'win_pct':'Winning Percentage', 'index':'Team'},
+                title="Winning Percentage of All Teams in Domes")
+            )
+        ]
         
     else:
         target.Temp = target.Temp.astype(float)
@@ -268,15 +267,14 @@ def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
         final = final.sort_values('win_pct', ascending=False)
         final = final.drop('tie')
 
-        if bar_chart:
-            bar_chart[0] = px.bar(final, y="win_pct", title="Winning Percentage of All Teams in Comparable Weather Conditions")
-        else:
-            bar_chart = [
-				dcc.Graph(
-					figure=px.bar(final, y="win_pct", title="Winning Percentage of All Teams in Comparable Weather Conditions")
-                )
-            ]
+        chart = [
+            dcc.Graph(
+                figure=px.bar(final, y="win_pct", 
+                labels={'win_pct':'Winning Percentage', 'index':'Team'},
+                title="Winning Percentage of All Teams in Comparable Weather Conditions")
+            )
+        ]
     
-    return (stringret, table_cols, table_records, bar_chart)
+    return (stringret, table_cols, table_records, chart)
 
 app.run_server(debug=True, host="0.0.0.0")
