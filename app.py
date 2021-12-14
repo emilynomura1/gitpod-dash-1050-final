@@ -167,16 +167,13 @@ app.layout = html.Div([
     Output(component_id='table', component_property='data'),
     Output(component_id='bar-chart', component_property='children')],
     Input(component_id='submit-button', component_property='n_clicks'),
-    State(component_id='my_dropdown1', component_property='value'),
-    State(component_id='bar-chart', component_property='children')
- 
+    State(component_id='my_dropdown1', component_property='value')
 )
 
-def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
+def pickATeam(n_clicks, input_my_dropdown1): 
     if (n_clicks == 0):
         test = pd.DataFrame()
         stringret = "Please select a team."
-        #dispret = {'display': 'none'}
         table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
         table_records = test.to_dict('records')
         chart = None
@@ -184,7 +181,6 @@ def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
     
     if (df[(df.Home == input_my_dropdown1)|(df.Away == input_my_dropdown1)].shape[0] == 0):
         stringret = "Your team has a bye this week."
-        #dispret = {'display': 'none'}
         test = pd.DataFrame()
         table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
         table_records = test.to_dict('records')
@@ -197,7 +193,6 @@ def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
         away = target['Away'].iat[0]
         score = target['Time (ET)'].iat[0]
         stringret = "Your team has already played. The {} were the away team and the {} were the home team. {}".format(away, home, score)
-        #dispret = {'display': 'none'}
         test = pd.DataFrame()
         table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
         table_records = test.to_dict('records')
@@ -206,6 +201,15 @@ def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
     
     target = future[(future.Away == input_my_dropdown1) | (future.Home == input_my_dropdown1)]
     team = historical[(historical.home == input_my_dropdown1)|(historical.away == input_my_dropdown1)]
+    
+    if (target.Temp.values[0] == "Forecast TBD"):
+        stringret = "No forecast yet for this game."
+        test = pd.DataFrame()
+        table_cols = [{"name": str(i), "id": str(i)} for i in test.columns]
+        table_records = test.to_dict('records')
+        chart = None
+        return (stringret, table_cols, table_records, chart)
+    
     if (target.Temp.values[0] == "DOME"):
         comparable = team[team.stadium=='dome']
         x = round(comparable[comparable.winner == input_my_dropdown1].shape[0]/comparable.shape[0],2)
@@ -254,9 +258,12 @@ def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
         table_cols = [{"name": str(i), "id": str(i)} for i in comparable.columns]
         table_records = comparable.to_dict('records')
 
-        winners = comparable.groupby(by='winner').count()['date']
-        aways = comparable.groupby(by='away').count()['date']
-        homes = comparable.groupby(by='home').count()['date']
+        all_comp = historical[(historical.avg_temp > lowtemp)&(historical.avg_temp < uptemp) &
+            (historical.precipitation==target.Precipitation.values[0]) &
+            (historical.avg_wind < upwind )&(historical.avg_wind > lowwind )]
+        winners = all_comp.groupby(by='winner').count()['date']
+        aways = all_comp.groupby(by='away').count()['date']
+        homes = all_comp.groupby(by='home').count()['date']
 
         temp = pd.merge(winners, aways, how='outer', left_index=True, right_index=True)
         final = pd.merge(temp, homes, how='outer', left_index=True, right_index=True)
@@ -265,7 +272,8 @@ def pickATeam(n_clicks, input_my_dropdown1, bar_chart):
         final['games'] = final['away_games'] + final['home_games']
         final['win_pct'] = final['wins'] / final['games']
         final = final.sort_values('win_pct', ascending=False)
-        final = final.drop('tie')
+        if 'tie' in final.index:
+            final = final.drop('tie')
 
         chart = [
             dcc.Graph(
